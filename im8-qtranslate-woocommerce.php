@@ -3,7 +3,7 @@
  * Plugin Name: IM8 qTranslate WooCommerce
  * Plugin URI: http://wordpress.org/plugins/im8-qtranslate-woocommerce/
  * Description: Front-end integration of qTranslate into WooCommerce.
- * Version: 1.0
+ * Version: 1.1
  * Author: intermedi8
  * Author URI: http://intermedi8.de
  * License: MIT
@@ -37,7 +37,7 @@ class IM8qTranslateWooCommerce {
 	 *
 	 * @type	string
 	 */
-	protected $version = '1.0';
+	protected $version = '1.1';
 
 
 	/**
@@ -142,10 +142,7 @@ class IM8qTranslateWooCommerce {
 		if (is_admin()) {
 			add_action('admin_init', array($this, 'autoupdate'));
 
-			if (
-				'plugins' === self::$page_base
-				&& version_compare($this->version, '1.0', '>')
-			)
+			if ('plugins' === self::$page_base)
 				add_action('in_plugin_update_message-'.basename(dirname(__FILE__)).'/'.basename(__FILE__), array($this, 'update_message'), 10, 2);
 		}
 
@@ -264,10 +261,15 @@ class IM8qTranslateWooCommerce {
 				'woocommerce_cart_tax_totals' => 10,
 				'woocommerce_gateway_description' => 10,
 				'woocommerce_gateway_title' => 10,
+				'woocommerce_in_cart_product_title' => 10,
 				'woocommerce_order_tax_totals' => 10,
 				'woocommerce_page_title' => 10,
+				'woocommerce_order_product_title' => 10,
 				'woocommerce_variation_option_name' => 10,
 				'wp_get_object_terms' => 10,
+				// since WooCommerce 2.1
+				'woocommerce_cart_item_name' => 10,
+				'woocommerce_order_item_name' => 10,
 			);
 			$filters = apply_filters('im8qtranslatewoocommerce_gettext_filters', $filters);
 			foreach ($filters as $id => $priority)
@@ -294,7 +296,7 @@ class IM8qTranslateWooCommerce {
 
 		if (function_exists('qtrans_getLanguage')) {
 			$filters = array(
-				// since WooCommerce 2.1.0
+				// since WooCommerce 2.1
 				'woocommerce_get_endpoint_url' => 10,
 			);
 			$filters = apply_filters('im8qtranslatewoocommerce_url_filters', $filters);
@@ -303,7 +305,7 @@ class IM8qTranslateWooCommerce {
 
 			$filters = array(
 				'woocommerce_params' => 10,
-				// since WooCommerce 2.1.0
+				// since WooCommerce 2.1
 				'wc_add_to_cart_params' => 10,
 				'wc_cart_fragments_params' => 10,
 				'wc_cart_params' => 10,
