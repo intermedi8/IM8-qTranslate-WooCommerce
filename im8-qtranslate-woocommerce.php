@@ -3,7 +3,7 @@
  * Plugin Name: IM8 qTranslate WooCommerce
  * Plugin URI: http://wordpress.org/plugins/im8-qtranslate-woocommerce/
  * Description: Front-end integration of qTranslate into WooCommerce.
- * Version: 1.1
+ * Version: 1.2
  * Author: intermedi8
  * Author URI: http://intermedi8.de
  * License: MIT
@@ -37,7 +37,7 @@ class IM8qTranslateWooCommerce {
 	 *
 	 * @type	string
 	 */
-	protected $version = '1.1';
+	protected $version = '1.2';
 
 
 	/**
@@ -252,9 +252,8 @@ class IM8qTranslateWooCommerce {
 	 * @return	void
 	 */
 	protected function add_filters() {
-		if (function_exists('__')) {
+		if (function_exists('qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage')) {
 			$filters = array(
-				'get_term' => 10,
 				'the_title_attribute' => 10,
 				'woocommerce_attribute' => 10,
 				'woocommerce_attribute_label' => 10,
@@ -266,15 +265,28 @@ class IM8qTranslateWooCommerce {
 				'woocommerce_page_title' => 10,
 				'woocommerce_order_product_title' => 10,
 				'woocommerce_variation_option_name' => 10,
-				'wp_get_object_terms' => 10,
 				// since WooCommerce 2.1
 				'woocommerce_cart_item_name' => 10,
 				'woocommerce_order_item_name' => 10,
 			);
-			$filters = apply_filters('im8qtranslatewoocommerce_gettext_filters', $filters);
+			$filters = apply_filters('im8qtranslatewoocommerce_translate_string_filters', $filters);
 			foreach ($filters as $id => $priority)
-				add_filter($id, '__', $priority);
-		} // if (function_exists('__'))
+				add_filter($id, 'qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage', $priority);
+
+			$filters = array(
+				'get_term' => 10,
+			);
+			$filters = apply_filters('im8qtranslatewoocommerce_translate_term_filters', $filters);
+			foreach ($filters as $id => $priority)
+				add_filter($id, array($this, 'translate_term'), $priority);
+
+			$filters = array(
+				'wp_get_object_terms' => 10,
+			);
+			$filters = apply_filters('im8qtranslatewoocommerce_translate_terms_filters', $filters);
+			foreach ($filters as $id => $priority)
+				add_filter($id, array($this, 'translate_terms'), $priority);
+		} // if (function_exists('qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage'))
 
 		if (function_exists('qtrans_convertURL')) {
 			$filters = array(
@@ -323,6 +335,40 @@ class IM8qTranslateWooCommerce {
 				add_filter($id, array($this, 'add_lang_query_var_to_payment_redirect_url'), $priority);
 		} // if (function_exists('qtrans_getLanguage'))
 	} // function add_filters
+
+
+	/**
+	 * Translate term name into current (or default) language.
+	 *
+	 * @see		add_filters()
+	 * @param	object $term Term object
+	 * @return	object
+	 */
+	function translate_term($term) {
+		if (
+			isset($term)
+			&& isset($term->name)
+		)
+			$term->name = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage($term->name);
+
+		return $term;
+	} // function translate_term
+
+
+	/**
+	 * Translate term names into current (or default) language.
+	 *
+	 * @see		add_filters()
+	 * @param	array $terms Term objects
+	 * @return	array
+	 */
+	function translate_terms($terms) {
+		if (is_array($terms) && count($terms))
+			foreach ($terms as $key => $term)
+				$terms[$key] = $this->translate_term($term);
+
+		return $terms;
+	} // function translate_terms
 
 
 	/**

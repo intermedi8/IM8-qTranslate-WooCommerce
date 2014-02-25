@@ -38,6 +38,9 @@ If you would like to **contribute** to this plugin, see its <a href="https://git
 
 == Changelog ==
 
+= 1.2 =
+* bugfix: refactored `get_term` and `wp_get_object_terms` filters to get rid of PHP warnings (thanks to _stevenvd_ and _miso00_ for reporting this)
+
 = 1.1 =
 * added some missing filters for product/item names (thanks to _Dobbydoo_ for the hint)
 * compatible up to WooCommerce 2.1.2
