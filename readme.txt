@@ -20,7 +20,7 @@ Front-end integration of qTranslate into WooCommerce.
 * Automatically adapt breadcrumbs to the current language
 * Automatically keep the current language when doing AJAX requests
 * Automatically send emails in the current language
-* **Automatically adapt new WooCommerce endpoints** (since 2.1.0) and redirects to the current language
+* **Automatically adapt new WooCommerce endpoints** (since 2.1) and redirects to the current language
 * Ad-free (of course, donations are welcome)
 
 If you would like to **contribute** to this plugin, see its <a href="https://github.com/intermedi8/im8-qtranslate-woocommerce" target="_blank">**GitHub repository**</a>.
@@ -37,6 +37,12 @@ If you would like to **contribute** to this plugin, see its <a href="https://git
 2. **Front-end example** - Direct comparison of how a single product looks like in English and German.
 
 == Changelog ==
+
+= 1.3 =
+* added filters for shipping and subtotal display
+* added filters for gateway texts (also used for emails)
+* adapted filters for tax texts
+* compatible up to WooCommerce 2.1.3
 
 = 1.2 =
 * bugfix: refactored `get_term` and `wp_get_object_terms` filters to get rid of PHP warnings (thanks to _stevenvd_ and _miso00_ for reporting this)

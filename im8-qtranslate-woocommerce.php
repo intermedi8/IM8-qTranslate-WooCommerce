@@ -3,7 +3,7 @@
  * Plugin Name: IM8 qTranslate WooCommerce
  * Plugin URI: http://wordpress.org/plugins/im8-qtranslate-woocommerce/
  * Description: Front-end integration of qTranslate into WooCommerce.
- * Version: 1.2
+ * Version: 1.3
  * Author: intermedi8
  * Author URI: http://intermedi8.de
  * License: MIT
@@ -37,7 +37,7 @@ class IM8qTranslateWooCommerce {
 	 *
 	 * @type	string
 	 */
-	protected $version = '1.2';
+	protected $version = '1.3';
 
 
 	/**
@@ -180,9 +180,9 @@ class IM8qTranslateWooCommerce {
 	/**
 	 * Wrapper for get_option().
 	 *
-	 * @param	string $key Option name.
-	 * @param	mixed $default Return value for missing key.
-	 * @return	mixed|$default Option value.
+	 * @param	string $key Option name
+	 * @param	mixed $default Return value for missing key
+	 * @return	mixed|$default Option value
 	 */
 	protected function get_option($key = null, $default = false) {
 		static $option = null;
@@ -208,8 +208,8 @@ class IM8qTranslateWooCommerce {
 	 * Print update message based on current plugin version's readme file.
 	 *
 	 * @hook	in_plugin_update_message-{$file}
-	 * @param	array $plugin_data Plugin metadata.
-	 * @param	array $r Metadata about the available plugin update.
+	 * @param	array $plugin_data Plugin metadata
+	 * @param	array $r Metadata about the available plugin update
 	 * @return	void
 	 */
 	public function update_message($plugin_data, $r) {
@@ -257,17 +257,17 @@ class IM8qTranslateWooCommerce {
 				'the_title_attribute' => 10,
 				'woocommerce_attribute' => 10,
 				'woocommerce_attribute_label' => 10,
+				'woocommerce_cart_item_name' => 10,
 				'woocommerce_cart_tax_totals' => 10,
 				'woocommerce_gateway_description' => 10,
 				'woocommerce_gateway_title' => 10,
 				'woocommerce_in_cart_product_title' => 10,
-				'woocommerce_order_tax_totals' => 10,
 				'woocommerce_page_title' => 10,
-				'woocommerce_order_product_title' => 10,
-				'woocommerce_variation_option_name' => 10,
-				// since WooCommerce 2.1
-				'woocommerce_cart_item_name' => 10,
 				'woocommerce_order_item_name' => 10,
+				'woocommerce_order_product_title' => 10,
+				'woocommerce_order_shipping_to_display' => 10,
+				'woocommerce_order_subtotal_to_display' => 10,
+				'woocommerce_variation_option_name' => 10,
 			);
 			$filters = apply_filters('im8qtranslatewoocommerce_translate_string_filters', $filters);
 			foreach ($filters as $id => $priority)
@@ -286,6 +286,21 @@ class IM8qTranslateWooCommerce {
 			$filters = apply_filters('im8qtranslatewoocommerce_translate_terms_filters', $filters);
 			foreach ($filters as $id => $priority)
 				add_filter($id, array($this, 'translate_terms'), $priority);
+
+			$filters = array(
+				'woocommerce_order_tax_totals' => 10,
+			);
+			$filters = apply_filters('im8qtranslatewoocommerce_translate_tax_totals_filters', $filters);
+			foreach ($filters as $id => $priority)
+				add_filter($id, array($this, 'translate_tax_totals'), $priority);
+
+			$filters = array(
+				'option_woocommerce_bacs_settings' => 10,
+				'option_woocommerce_cheque_settings' => 10,
+			);
+			$filters = apply_filters('im8qtranslatewoocommerce_translate_gateway_settings_filters', $filters);
+			foreach ($filters as $id => $priority)
+				add_filter($id, array($this, 'translate_gateway_settings'), $priority);
 		} // if (function_exists('qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage'))
 
 		if (function_exists('qtrans_convertURL')) {
@@ -308,7 +323,6 @@ class IM8qTranslateWooCommerce {
 
 		if (function_exists('qtrans_getLanguage')) {
 			$filters = array(
-				// since WooCommerce 2.1
 				'woocommerce_get_endpoint_url' => 10,
 			);
 			$filters = apply_filters('im8qtranslatewoocommerce_url_filters', $filters);
@@ -316,12 +330,11 @@ class IM8qTranslateWooCommerce {
 				add_filter($id, array($this, 'add_lang_query_var_to_url'), $priority);
 
 			$filters = array(
-				'woocommerce_params' => 10,
-				// since WooCommerce 2.1
 				'wc_add_to_cart_params' => 10,
 				'wc_cart_fragments_params' => 10,
 				'wc_cart_params' => 10,
 				'wc_checkout_params' => 10,
+				'woocommerce_params' => 10,
 			);
 			$filters = apply_filters('im8qtranslatewoocommerce_woocommerce_params_filters', $filters);
 			foreach ($filters as $id => $priority)
@@ -369,6 +382,43 @@ class IM8qTranslateWooCommerce {
 
 		return $terms;
 	} // function translate_terms
+
+
+	/**
+	 * Translate tax labels into current (or default) language.
+	 *
+	 * @see		add_filters()
+	 * @param	array $tax Tax totals array
+	 * @return	array
+	 */
+	function translate_tax_totals($tax_totals) {
+		foreach ($tax_totals as $key => $tax_total)
+			if (isset($tax_total->label))
+				$tax_totals[$key]->label = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage($tax_total->label);
+
+		return $tax_totals;
+	} // function translate_taxt_totals
+
+
+	/**
+	 * Translate gateway settings into current (or default) language.
+	 *
+	 * @see		add_filters()
+	 * @param	array $settings Settings array
+	 * @return	array
+	 */
+	function translate_gateway_settings($settings) {
+		if (is_array($settings))
+			foreach (array(
+				'title',
+				'description',
+				'instructions',
+			) as $key)
+				if (isset($settings[$key]))
+					$settings[$key] = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage($settings[$key]);
+
+		return $settings;
+	} // function translate_gateway_settings
 
 
 	/**
