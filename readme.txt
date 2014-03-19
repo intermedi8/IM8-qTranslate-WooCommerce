@@ -1,5 +1,5 @@
 === IM8 qTranslate WooCommerce ===
-Contributors: intermedi8
+Contributors: ipm-frommen, intermedi8
 Donate link: http://intermedi8.de
 Tags: qtranslate, woocommerce, i18n, l10n, language, multilanguage, multilingual, translation
 Requires at least: 3.8.1
@@ -20,7 +20,7 @@ Front-end integration of qTranslate into WooCommerce.
 * Automatically adapt breadcrumbs to the current language
 * Automatically keep the current language when doing AJAX requests
 * Automatically send emails in the current language
-* **Automatically adapt new WooCommerce endpoints** (since 2.1) and redirects to the current language
+* Automatically adapt WooCommerce endpoints and redirects to the current language
 * Ad-free (of course, donations are welcome)
 
 If you would like to **contribute** to this plugin, see its <a href="https://github.com/intermedi8/im8-qtranslate-woocommerce" target="_blank">**GitHub repository**</a>.
@@ -37,6 +37,11 @@ If you would like to **contribute** to this plugin, see its <a href="https://git
 2. **Front-end example** - Direct comparison of how a single product looks like in English and German.
 
 == Changelog ==
+
+= 1.4 =
+* added filters for shipping method label (thanks to _WISTFUL_ for reporting this)
+* compatible up to qTranslate 2.5.39
+* compatible up to WooCommerce 2.1.5
 
 = 1.3 =
 * added filters for shipping and subtotal display
