@@ -3,7 +3,7 @@
  * Plugin Name: IM8 qTranslate WooCommerce
  * Plugin URI: http://wordpress.org/plugins/im8-qtranslate-woocommerce/
  * Description: Front-end integration of qTranslate into WooCommerce.
- * Version: 1.4.1
+ * Version: 1.4.2
  * Author: ipm-frommen, intermedi8
  * Author URI: http://intermedi8.de
  * License: MIT
@@ -37,7 +37,7 @@ class IM8qTranslateWooCommerce {
 	 *
 	 * @type	string
 	 */
-	protected $version = '1.4.1';
+	protected $version = '1.4.2';
 
 
 	/**
@@ -162,7 +162,7 @@ class IM8qTranslateWooCommerce {
 				add_action( 'in_plugin_update_message-'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), array( $this, 'update_message' ), 10, 2 );
 
 			if ( 'admin-ajax' === self::$page_base )
-				add_action( 'shutdown', array( $this, 'set_transient' ) );
+				$this->add_ajax_actions();
 		}
 
 		$this->add_filters();
@@ -179,9 +179,9 @@ class IM8qTranslateWooCommerce {
 		$options = $this->get_option();
 		$update_successful = TRUE;
 
-		if ( version_compare( $options['version'], '1.0', '<' ) ) {
+		if ( version_compare( $options[ 'version' ], '1.0', '<' ) ) {
 			$new_options = array();
-			$new_options['version'] = '1.0';
+			$new_options[ 'version' ] = '1.0';
 
 			if ( update_option( $this->option_name, $new_options ) )
 				$options = $new_options;
@@ -190,7 +190,7 @@ class IM8qTranslateWooCommerce {
 		}
 
 		if ( $update_successful ) {
-			$options['version'] = $this->version;
+			$options[ 'version' ] = $this->version;
 			update_option( $this->option_name, $options );
 		}
 	} // function autoupdate
@@ -216,10 +216,10 @@ class IM8qTranslateWooCommerce {
 		if ( NULL === $key )
 			return $option;
 
-		if ( ! isset( $option[$key] ) )
+		if ( ! isset( $option[ $key ] ) )
 			return $default;
 
-		return $option[$key];
+		return $option[ $key ];
 	} // function get_option
 
 
@@ -232,7 +232,7 @@ class IM8qTranslateWooCommerce {
 	 * @return	void
 	 */
 	public function update_message( $plugin_data, $r ) {
-		if ( $plugin_data['update'] ) {
+		if ( $plugin_data[ 'update' ] ) {
 			$readme = wp_remote_fopen( 'http://plugins.svn.wordpress.org/'.$this->repository.'/trunk/readme.txt' );
 			if ( ! $readme )
 				return;
@@ -240,11 +240,11 @@ class IM8qTranslateWooCommerce {
 			$pattern = '/==\s*Changelog\s*==( .* )=\s*'.preg_quote( $this->version ).'\s*=/s';
 			if (
 				FALSE === preg_match( $pattern, $readme, $matches )
-				|| ! isset( $matches[1] )
+				|| ! isset( $matches[ 1 ] )
 			)
 				return;
 
-			$changelog = ( array ) preg_split( '/[\r\n]+/', trim( $matches[1] ) );
+			$changelog = ( array ) preg_split( '/[\r\n]+/', trim( $matches[ 1 ] ) );
 			if ( empty( $changelog ) )
 				return;
 
@@ -265,9 +265,63 @@ class IM8qTranslateWooCommerce {
 
 
 	/**
+	 * Register AJAX-specific actions.
+	 *
+	 * @see		init()
+	 * @return	void
+	 */
+	private function add_ajax_actions() {
+		$actions = array(
+			'add_new_attribute' => FALSE,
+			'add_order_fee' => FALSE,
+			'add_order_item' => FALSE,
+			'add_order_item_meta' => FALSE,
+			'add_order_note' => FALSE,
+			'add_to_cart' => TRUE,
+			'add_variation' => FALSE,
+			'apply_coupon' => TRUE,
+			'calc_line_taxes' => FALSE,
+			'checkout' => TRUE,
+			'delete_order_note' => FALSE,
+			'feature_product' => FALSE,
+			'get_customer_details' => FALSE,
+			'get_refreshed_fragments' => TRUE,
+			'grant_access_to_download' => FALSE,
+			'increase_order_item_stock' => FALSE,
+			'json_search_customers' => FALSE,
+			'json_search_downloadable_products_and_variations' => FALSE,
+			'json_search_products' => FALSE,
+			'json_search_products_and_variations' => FALSE,
+			'link_all_variations' => FALSE,
+			'mark_order_complete' => FALSE,
+			'mark_order_processing' => FALSE,
+			'product_ordering' => FALSE,
+			'reduce_order_item_stock' => FALSE,
+			'remove_order_item' => FALSE,
+			'remove_order_item_meta' => FALSE,
+			'remove_variation' => FALSE,
+			'remove_variations' => FALSE,
+			'revoke_access_to_download' => FALSE,
+			'save_attributes' => FALSE,
+			'term_ordering'  => FALSE,
+			'update_order_review' => TRUE,
+			'update_shipping_method' => TRUE,
+		);
+
+		foreach ( $actions as $action => $nopriv ) {
+			add_action( 'wp_ajax_woocommerce_' . $action, array( $this, 'set_transient' ) );
+
+			if ( $nopriv )
+				add_action( 'wp_ajax_nopriv_woocommerce_' . $action, array( $this, 'set_transient' ) );
+		}
+	} // function add_ajax_actions
+
+
+	/**
 	 * Sets a transient hook in order to switch back to the default admin language on the next admin page call.
 	 *
-	 * @wp-hook	shutdown
+	 * @wp-hook	wp_ajax_woocommerce_{$action}
+	 * @wp-hook	wp_ajax_nopriv_woocommerce_{$action}
 	 */
 	public function set_transient() {
 		set_transient( 'im8qw_custom_admin_language', TRUE, 60 * 10 );
@@ -280,7 +334,7 @@ class IM8qTranslateWooCommerce {
 	 * @see		init()
 	 * @return	void
 	 */
-	protected function add_filters() {
+	private function add_filters() {
 		if ( function_exists( 'qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage' ) ) {
 			$filters = array(
 				'the_title_attribute' => 10,
@@ -408,7 +462,7 @@ class IM8qTranslateWooCommerce {
 	function translate_terms( $terms ) {
 		if ( is_array( $terms ) && count( $terms ) )
 			foreach ( $terms as $key => $term )
-				$terms[$key] = $this->translate_term( $term );
+				$terms[ $key ] = $this->translate_term( $term );
 
 		return $terms;
 	} // function translate_terms
@@ -424,7 +478,7 @@ class IM8qTranslateWooCommerce {
 	function translate_tax_totals( $tax_totals ) {
 		foreach ( $tax_totals as $key => $tax_total )
 			if ( isset( $tax_total->label ) )
-				$tax_totals[$key]->label = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage( $tax_total->label );
+				$tax_totals[ $key ]->label = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage( $tax_total->label );
 
 		return $tax_totals;
 	} // function translate_taxt_totals
@@ -444,8 +498,8 @@ class IM8qTranslateWooCommerce {
 				'description',
 				'instructions',
 			) as $key )
-				if ( isset( $settings[$key] ) )
-					$settings[$key] = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage( $settings[$key] );
+				if ( isset( $settings[ $key ] ) )
+					$settings[ $key ] = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage( $settings[ $key ] );
 
 		return $settings;
 	} // function translate_gateway_settings
@@ -479,8 +533,8 @@ class IM8qTranslateWooCommerce {
 			'checkout_url',
 		);
 		foreach ( $keys as $key )
-			if ( isset( $params[$key] ) )
-				$params[$key] = add_query_arg( 'lang', qtrans_getLanguage(), $params[$key] );
+			if ( isset( $params[ $key ] ) )
+				$params[ $key ] = add_query_arg( 'lang', qtrans_getLanguage(), $params[ $key ] );
 
 		return $params;
 	} // function add_lang_query_var_to_woocommerce_params
@@ -495,8 +549,8 @@ class IM8qTranslateWooCommerce {
 	 */
 	function add_lang_query_var_to_payment_redirect_url( $data ) {
 		$key = 'redirect';
-		if ( isset( $data[$key] ) )
-			$data[$key] = add_query_arg( 'lang', qtrans_getLanguage(), $data[$key] );
+		if ( isset( $data[ $key ] ) )
+			$data[ $key ] = add_query_arg( 'lang', qtrans_getLanguage(), $data[ $key ] );
 
 		return $data;
 	} // function add_lang_query_var_to_payment_redirect_url

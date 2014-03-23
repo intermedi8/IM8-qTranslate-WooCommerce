@@ -38,6 +38,9 @@ If you would like to **contribute** to this plugin, see its <a href="https://git
 
 == Changelog ==
 
+= 1.4.2 =
+* bugfixed/improved last version (`set_transient` function is now a lot more restricted to WooCommerce)
+
 = 1.4.1 =
 * the plugin now does not affect the admin language anymore (thanks to _WISTFUL_, again, for reporting this)
 
