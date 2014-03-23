@@ -38,6 +38,9 @@ If you would like to **contribute** to this plugin, see its <a href="https://git
 
 == Changelog ==
 
+= 1.4.1 =
+* the plugin now does not affect the admin language anymore (thanks to _WISTFUL_, again, for reporting this)
+
 = 1.4 =
 * added filters for shipping method label (thanks to _WISTFUL_ for reporting this)
 * compatible up to qTranslate 2.5.39

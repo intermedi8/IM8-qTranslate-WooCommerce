@@ -3,7 +3,7 @@
  * Plugin Name: IM8 qTranslate WooCommerce
  * Plugin URI: http://wordpress.org/plugins/im8-qtranslate-woocommerce/
  * Description: Front-end integration of qTranslate into WooCommerce.
- * Version: 1.4
+ * Version: 1.4.1
  * Author: ipm-frommen, intermedi8
  * Author URI: http://intermedi8.de
  * License: MIT
@@ -37,7 +37,7 @@ class IM8qTranslateWooCommerce {
 	 *
 	 * @type	string
 	 */
-	protected $version = '1.4';
+	protected $version = '1.4.1';
 
 
 	/**
@@ -62,6 +62,14 @@ class IM8qTranslateWooCommerce {
 	 * @type	string
 	 */
 	protected $repository = 'im8-qtranslate-woocommerce';
+
+
+	/**
+	 * Plugin transient name.
+	 *
+	 * @type	string
+	 */
+	protected static $transient_name = 'im8qw_custom_admin_language';
 
 
 	/**
@@ -127,7 +135,15 @@ class IM8qTranslateWooCommerce {
 			'update-core',
 		);
 
-		if ( ! is_admin() || in_array( self::$page_base, $admin_pages ) )
+		if (
+			is_admin()
+			&& get_transient( self::$transient_name )
+		) {
+			$_COOKIE[ 'qtrans_admin_language' ] = get_option( 'qtrans_default_language' );
+			delete_transient( self::$transient_name );
+		}
+
+		 if ( ! is_admin() || in_array( self::$page_base, $admin_pages ) )
 			add_action( 'wp_loaded', array( self::$instance, 'init' ) );
 	} // function init_on_demand
 
@@ -144,6 +160,9 @@ class IM8qTranslateWooCommerce {
 
 			if ( 'plugins' === self::$page_base )
 				add_action( 'in_plugin_update_message-'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), array( $this, 'update_message' ), 10, 2 );
+
+			if ( 'admin-ajax' === self::$page_base )
+				add_action( 'shutdown', array( $this, 'set_transient' ) );
 		}
 
 		$this->add_filters();
@@ -243,6 +262,16 @@ class IM8qTranslateWooCommerce {
 			echo $output;
 		}
 	} // function update_message
+
+
+	/**
+	 * Sets a transient hook in order to switch back to the default admin language on the next admin page call.
+	 *
+	 * @wp-hook	shutdown
+	 */
+	public function set_transient() {
+		set_transient( 'im8qw_custom_admin_language', TRUE, 60 * 10 );
+	} // function set_transient
 
 
 	/**
@@ -486,7 +515,7 @@ class IM8qTranslateWooCommerce {
 } // class IM8qTranslateWooCommerce
 
 
-add_action( 'plugins_loaded', array( IM8qTranslateWooCommerce::get_instance(), 'init_on_demand' ) );
+add_action( 'plugins_loaded', array( IM8qTranslateWooCommerce::get_instance(), 'init_on_demand' ), 0 );
 
 
 endif; // if ( ! class_exists( 'IM8qTranslateWooCommerce' ) )
