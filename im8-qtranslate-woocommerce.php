@@ -3,7 +3,7 @@
  * Plugin Name: IM8 qTranslate WooCommerce
  * Plugin URI: http://wordpress.org/plugins/im8-qtranslate-woocommerce/
  * Description: Front-end integration of qTranslate into WooCommerce.
- * Version: 1.4.2
+ * Version: 1.4.3
  * Author: ipm-frommen, intermedi8
  * Author URI: http://intermedi8.de
  * License: MIT
@@ -37,7 +37,7 @@ class IM8qTranslateWooCommerce {
 	 *
 	 * @type	string
 	 */
-	protected $version = '1.4.2';
+	protected $version = '1.4.3';
 
 
 	/**
@@ -161,8 +161,11 @@ class IM8qTranslateWooCommerce {
 			if ( 'plugins' === self::$page_base )
 				add_action( 'in_plugin_update_message-'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), array( $this, 'update_message' ), 10, 2 );
 
-			if ( 'admin-ajax' === self::$page_base )
-				$this->add_ajax_actions();
+			if (
+				'admin-ajax' === self::$page_base
+				&& $this->is_ajax_woocommerce()
+			)
+				add_action( 'shutdown', array( $this, 'set_transient' ) );
 		}
 
 		$this->add_filters();
@@ -265,63 +268,58 @@ class IM8qTranslateWooCommerce {
 
 
 	/**
-	 * Register AJAX-specific actions.
+	 * Check if this is a WooCommerce AJAX request
 	 *
 	 * @see		init()
-	 * @return	void
+	 * @return	bool
 	 */
-	private function add_ajax_actions() {
-		$actions = array(
-			'add_new_attribute' => FALSE,
-			'add_order_fee' => FALSE,
-			'add_order_item' => FALSE,
-			'add_order_item_meta' => FALSE,
-			'add_order_note' => FALSE,
-			'add_to_cart' => TRUE,
-			'add_variation' => FALSE,
-			'apply_coupon' => TRUE,
-			'calc_line_taxes' => FALSE,
-			'checkout' => TRUE,
-			'delete_order_note' => FALSE,
-			'feature_product' => FALSE,
-			'get_customer_details' => FALSE,
-			'get_refreshed_fragments' => TRUE,
-			'grant_access_to_download' => FALSE,
-			'increase_order_item_stock' => FALSE,
-			'json_search_customers' => FALSE,
-			'json_search_downloadable_products_and_variations' => FALSE,
-			'json_search_products' => FALSE,
-			'json_search_products_and_variations' => FALSE,
-			'link_all_variations' => FALSE,
-			'mark_order_complete' => FALSE,
-			'mark_order_processing' => FALSE,
-			'product_ordering' => FALSE,
-			'reduce_order_item_stock' => FALSE,
-			'remove_order_item' => FALSE,
-			'remove_order_item_meta' => FALSE,
-			'remove_variation' => FALSE,
-			'remove_variations' => FALSE,
-			'revoke_access_to_download' => FALSE,
-			'save_attributes' => FALSE,
-			'term_ordering'  => FALSE,
-			'update_order_review' => TRUE,
-			'update_shipping_method' => TRUE,
-		);
+	private function is_ajax_woocommerce() {
+		if ( ! isset( $_REQUEST[ 'action' ] ) )
+			return FALSE;
 
-		foreach ( $actions as $action => $nopriv ) {
-			add_action( 'wp_ajax_woocommerce_' . $action, array( $this, 'set_transient' ) );
-
-			if ( $nopriv )
-				add_action( 'wp_ajax_nopriv_woocommerce_' . $action, array( $this, 'set_transient' ) );
-		}
-	} // function add_ajax_actions
+		return in_array( substr( $_REQUEST[ 'action' ], 12 ), array(
+			'add_new_attribute',
+			'add_order_fee',
+			'add_order_item',
+			'add_order_item_meta',
+			'add_order_note',
+			'add_to_cart',
+			'add_variation',
+			'apply_coupon',
+			'calc_line_taxes',
+			'checkout',
+			'delete_order_note',
+			'feature_product',
+			'get_customer_details',
+			'get_refreshed_fragments',
+			'grant_access_to_download',
+			'increase_order_item_stock',
+			'json_search_customers',
+			'json_search_downloadable_products_and_variations',
+			'json_search_products',
+			'json_search_products_and_variations',
+			'link_all_variations',
+			'mark_order_complete',
+			'mark_order_processing',
+			'product_ordering',
+			'reduce_order_item_stock',
+			'remove_order_item',
+			'remove_order_item_meta',
+			'remove_variation',
+			'remove_variations',
+			'revoke_access_to_download',
+			'save_attributes',
+			'term_ordering' ,
+			'update_order_review',
+			'update_shipping_method',
+		) );
+	} // function is_ajax_woocommerce
 
 
 	/**
 	 * Sets a transient hook in order to switch back to the default admin language on the next admin page call.
 	 *
-	 * @wp-hook	wp_ajax_woocommerce_{$action}
-	 * @wp-hook	wp_ajax_nopriv_woocommerce_{$action}
+	 * @wp-hook	shutdown
 	 */
 	public function set_transient() {
 		set_transient( 'im8qw_custom_admin_language', TRUE, 60 * 10 );
