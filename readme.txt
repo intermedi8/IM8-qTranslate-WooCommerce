@@ -38,6 +38,13 @@ If you would like to **contribute** to this plugin, see its <a href="https://git
 
 == Changelog ==
 
+= 1.5 =
+* split plugin into several files
+* removed static functions and properties (except for uninstall, of course)
+* introduced filters `im8qw_default_admin_language` and `im8qw_use_default_admin_language` in order to customize or deactivate the default admin language
+* code reformat
+* compatible up to WooCommerce 2.1.6
+
 = 1.4.3 =
 * bugfixed last version, again (third time's a charm)
 

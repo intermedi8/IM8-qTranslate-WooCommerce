@@ -1,0 +1,16 @@
+/**
+* IM8 Update Message Styles
+*
+* Author: ipm-frommen
+* Author URI: http://ipm-frommen.de
+*/
+
+.im8-update-message {
+	margin: 8px 0 0 26px;
+}
+
+.im8-update-message ul {
+	margin-left: 14px;
+	line-height: 1.5;
+	list-style: disc outside none;
+}
