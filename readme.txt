@@ -38,6 +38,9 @@ If you would like to **contribute** to this plugin, see its <a href="https://git
 
 == Changelog ==
 
+= 1.5.1 =
+* fixed fatal error for PHP version older than 5.3 (thanks to _3Lancer_ for reporting the error as well as providing the bugfix)
+
 = 1.5 =
 * split plugin into several files
 * removed static functions and properties (except for uninstall, of course)
