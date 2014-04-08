@@ -38,6 +38,10 @@ If you would like to **contribute** to this plugin, see its <a href="https://git
 
 == Changelog ==
 
+= 1.5.2 =
+* added filters for _Email "From" Name_ and _Email Footer Text_
+* added filter for `get_terms` calls to fix some widgets, amongst other things (thanks to _arejay_ for the hint)
+
 = 1.5.1 =
 * fixed fatal error for PHP version older than 5.3 (thanks to _3Lancer_ for reporting the error as well as providing the bugfix)
 

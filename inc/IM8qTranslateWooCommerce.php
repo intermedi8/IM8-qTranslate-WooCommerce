@@ -225,12 +225,14 @@ class IM8qTranslateWooCommerce {
 
 		if ( function_exists( 'qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage' ) ) {
 			$filters = array(
+				'option_woocommerce_email_from_name'          => 10,
 				'the_title_attribute'                         => 10,
 				'woocommerce_attribute'                       => 10,
 				'woocommerce_attribute_label'                 => 10,
 				'woocommerce_cart_item_name'                  => 10,
 				'woocommerce_cart_shipping_method_full_label' => 10,
 				'woocommerce_cart_tax_totals'                 => 10,
+				'woocommerce_email_footer_text'               => 10,
 				'woocommerce_gateway_description'             => 10,
 				'woocommerce_gateway_title'                   => 10,
 				'woocommerce_in_cart_product_title'           => 10,
@@ -255,6 +257,7 @@ class IM8qTranslateWooCommerce {
 			}
 
 			$filters = array(
+				'get_terms'           => 10,
 				'wp_get_object_terms' => 10,
 			);
 			$filters = apply_filters( 'im8qtranslatewoocommerce_translate_terms_filters', $filters );
