@@ -235,7 +235,6 @@ class IM8qTranslateWooCommerce {
 				'woocommerce_email_footer_text'               => 10,
 				'woocommerce_gateway_description'             => 10,
 				'woocommerce_gateway_title'                   => 10,
-				'woocommerce_in_cart_product_title'           => 10,
 				'woocommerce_page_title'                      => 10,
 				'woocommerce_order_item_name'                 => 10,
 				'woocommerce_order_product_title'             => 10,
@@ -292,7 +291,6 @@ class IM8qTranslateWooCommerce {
 				'woocommerce_checkout_no_payment_needed_redirect' => 10,
 				'woocommerce_get_cancel_order_url'                => 10,
 				'woocommerce_get_checkout_payment_url'            => 10,
-				'woocommerce_get_checkout_url'                    => 10,
 				'woocommerce_get_return_url'                      => 10,
 				'woocommerce_product_add_to_cart_url'             => 10,
 			);
@@ -304,11 +302,21 @@ class IM8qTranslateWooCommerce {
 
 		if ( function_exists( 'qtrans_getLanguage' ) ) {
 			$filters = array(
+				'woocommerce_get_cart_url'     => 10,
+				'woocommerce_get_checkout_url' => 10,
 				'woocommerce_get_endpoint_url' => 10,
 			);
 			$filters = apply_filters( 'im8qtranslatewoocommerce_url_filters', $filters );
 			foreach ( $filters as $id => $priority ) {
 				add_filter( $id, array( $this, 'add_lang_query_var_to_url' ), $priority );
+			}
+
+			$filters = array(
+				'site_url' => 10,
+			);
+			$filters = apply_filters( 'im8qtranslatewoocommerce_site_url_filters', $filters );
+			foreach ( $filters as $id => $priority ) {
+				add_filter( $id, array( $this, 'add_lang_query_var_to_site_url' ), $priority, 2 );
 			}
 
 			$filters = array(
@@ -567,6 +575,28 @@ class IM8qTranslateWooCommerce {
 	}
 
 	/**
+	 * Add `lang` query var to given site URL
+	 *
+	 * @see add_filters()
+	 *
+	 * @param string $url  Site URL
+	 * @param string $path Path
+	 *
+	 * @return string
+	 */
+	public function add_lang_query_var_to_site_url( $url, $path ) {
+
+		$paths = array(
+			'/wp-comments-post.php',
+		);
+		if ( in_array( $path, $paths ) ) {
+			$url = $this->add_lang_query_var_to_url( $url );
+		}
+
+		return $url;
+	}
+
+	/**
 	 * Add `lang` query var to given URL
 	 *
 	 * @see add_filters()
@@ -593,7 +623,7 @@ class IM8qTranslateWooCommerce {
 
 		$key = 'redirect';
 		if ( isset( $data[ $key ] ) ) {
-			$data[ $key ] = add_query_arg( 'lang', qtrans_getLanguage(), $data[ $key ] );
+			$data[ $key ] = $this->add_lang_query_var_to_url( $data[ $key ] );
 		}
 
 		return $data;
@@ -620,7 +650,7 @@ class IM8qTranslateWooCommerce {
 		);
 		foreach ( $keys as $key ) {
 			if ( isset( $params[ $key ] ) ) {
-				$params[ $key ] = add_query_arg( 'lang', qtrans_getLanguage(), $params[ $key ] );
+				$params[ $key ] = $this->add_lang_query_var_to_url( $params[ $key ] );
 			}
 		}
 

@@ -3,7 +3,7 @@
  * Plugin Name: IM8 qTranslate WooCommerce
  * Plugin URI: http://wordpress.org/plugins/im8-qtranslate-woocommerce/
  * Description: Front-end integration of qTranslate into WooCommerce.
- * Version: 1.5.2
+ * Version: 1.5.3
  * Author: ipm-frommen, intermedi8
  * Author URI: http://intermedi8.de
  * License: MIT
