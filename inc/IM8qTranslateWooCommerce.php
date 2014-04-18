@@ -103,10 +103,9 @@ class IM8qTranslateWooCommerce {
 			return;
 		}
 
-		$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
 		if (
-			! in_array( 'woocommerce/woocommerce.php', $active_plugins )
-			|| ! in_array( 'qtranslate/qtranslate.php', $active_plugins )
+			! did_action( 'woocommerce_loaded' )
+			|| ! defined( 'QTRANS_INIT' )
 		) {
 			return;
 		}

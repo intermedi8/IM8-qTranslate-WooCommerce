@@ -3,7 +3,7 @@ Contributors: ipm-frommen, intermedi8
 Donate link: http://intermedi8.de
 Tags: qtranslate, woocommerce, i18n, l10n, language, multilanguage, multilingual, translation
 Requires at least: 3.8.1
-Tested up to: 3.8.2
+Tested up to: 3.9
 Stable tag: trunk
 License: MIT
 License URI: http://opensource.org/licenses/MIT
@@ -37,6 +37,12 @@ If you would like to **contribute** to this plugin, see its <a href="https://git
 2. **Front-end example** - Direct comparison of how a single product looks like in English and German.
 
 == Changelog ==
+
+= 1.5.4 =
+* reset plugin init priority from 0 to default (10)
+* rewrite conditional in `init_on_demand` function to make plugin work with qTranslate forks
+* compatible up to WordPress 3.9
+* compatible up to WooCommerce 2.1.7
 
 = 1.5.3 =
 * added `site_url` filter for comment form to keep the current language when submitting a product review
